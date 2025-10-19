@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Jurisprudencia - Análisis Legal Avanzado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .animate-slideIn {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .hover-scale {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dark-mode {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode .bg-white {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        
+        .dark-mode .text-gray-600 {
+            color: #cbd5e0;
+        }
+        
+        .dark-mode .text-gray-800 {
+            color: #e2e8f0;
+        }
+        
+        .dark-mode .bg-gray-100 {
+            background-color: #2d3748;
+        }
+        
+        .dark-mode .bg-gray-50 {
+            background-color: #374151;
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 transition-colors duration-300">
+    <!-- Header mejorado -->
+    <header class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-gavel text-3xl"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">Sistema de Jurisprudencia</h1>
+                        <p class="text-sm opacity-90">Análisis Legal Avanzado</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="showFavorites()" class="p-2 rounded-full hover:bg-white/20 transition" title="Favoritos">
+                        <i class="fas fa-star"></i>
+                    </button>
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-white/20 transition" title="Modo oscuro">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button onclick="showStats()" class="p-2 rounded-full hover:bg-white/20 transition" title="Estadísticas">
+                        <i class="fas fa-chart-bar"></i>
+                    </button>
+                    <button onclick="updateData()" class="p-2 rounded-full hover:bg-white/20 transition" title="Actualizar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra de búsqueda avanzada -->
+    <div class="container mx-auto px-4 py-6">
+        <div class="bg-white rounded-lg shadow-lg p-6 animate-fadeIn">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-search mr-2"></i>Búsqueda
+                    </label>
+                    <input type="text" id="searchInput" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           placeholder="Buscar por número, demandante, demandado, expediente...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-sort mr-2"></i>Ordenar por
+                    </label>
+                    <select id="sortSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="fecha_publicacion DESC">Más recientes</option>
+                        <option value="fecha_publicacion ASC">Más antiguos</option>
+                        <option value="numero_sentencia ASC">Número sentencia</option>
+                        <option value="nombre_demandante ASC">Demandante</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-calendar mr-2"></i>Fecha desde
+                    </label>
+                    <input type="date" id="fechaDesde" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-calendar-check mr-2"></i>Fecha hasta
+                    </label>
+                    <input type="date" id="fechaHasta" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div class="flex items-end space-x-2">
+                    <button onclick="searchSentencias()" 
+                            class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                        <i class="fas fa-search mr-2"></i>Buscar
+                    </button>
+                    <button onclick="resetFilters()" 
+                            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="container mx-auto px-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="quickStats">
+            <!-- Se llenarán dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Lista de sentencias -->
+    <div class="container mx-auto px-4 pb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Sentencias</h2>
+            <div class="flex space-x-2">
+                <button onclick="exportData('csv')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <i class="fas fa-file-csv mr-2"></i>CSV
+                </button>
+                <button onclick="exportData('json')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-file-code mr-2"></i>JSON
+                </button>
+            </div>
+        </div>
+        
+        <div id="sentenciasList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Se llenará dinámicamente -->
+        </div>
+        
+        <!-- Paginación -->
+        <div id="pagination" class="mt-8 flex justify-center items-center space-x-1">
+            <!-- Se llenará dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Modal de detalles -->
+    <div id="detailModal" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-fadeIn">
+            <div class="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                <h3 class="text-2xl font-bold">Detalles de la Sentencia</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="p-6">
+                <!-- Se llenará dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de estadísticas -->
+    <div id="statsModal" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto animate-fadeIn">
+            <div class="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                <h3 class="text-2xl font-bold">Estadísticas del Sistema</h3>
+                <button onclick="closeStatsModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div id="statsContent" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Sentencias por Fecha</h4>
+                        <canvas id="chartFechas"></canvas>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Palabras Clave Más Frecuentes</h4>
+                        <canvas id="chartPalabras"></canvas>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h4 class="text-lg font-semibold mb-4">Búsquedas Más Frecuentes</h4>
+                    <div id="busquedasFrecuentes" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div id="notifications"></div>
+
+    <!-- Loading spinner -->
+    <div id="loadingSpinner" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg p-8 text-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
+            <p class="text-lg">Cargando...</p>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let darkMode = false;
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSentencias();
+            loadQuickStats();
+            
+            // Event listeners
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') searchSentencias();
+            });
+        });
+
+        // Funciones principales
+        async function loadSentencias(page = 1) {
+            showLoading();
+            currentPage = page;
+            
+            const params = new URLSearchParams({
+                page: page,
+                per_page: 12,
+                search: document.getElementById('searchInput').value,
+                fecha_desde: document.getElementById('fechaDesde').value,
+                fecha_hasta: document.getElementById('fechaHasta').value,
+                ordenar: document.getElementById('sortSelect').value
+            });
+            
+            try {
+                const response = await fetch(`${window.location.origin}/api/sentencias?${params}`);
+                const data = await response.json();
+                
+                renderSentencias(data.sentencias);
+                renderPagination(data.page, data.pages);
+                totalPages = data.pages;
+                
+            } catch (error) {
+                showNotification('Error al cargar sentencias', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderSentencias(sentencias) {
+            const container = document.getElementById('sentenciasList');
+            
+            if (sentencias.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-folder-open text-6xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-600 text-lg">No se encontraron sentencias</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = sentencias.map(sentencia => `
+                <div class="bg-white rounded-lg shadow-lg p-6 hover-scale animate-fadeIn">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-bold text-purple-600">
+                            ${sentencia.numero_sentencia}
+                        </h3>
+                        <span class="text-sm text-gray-500">
+                            <i class="fas fa-calendar mr-1"></i>${formatDate(sentencia.fecha_publicacion)}
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <p><i class="fas fa-user mr-2 text-purple-500"></i><strong>Demandante:</strong> ${sentencia.nombre_demandante}</p>
+                        <p><i class="fas fa-user-tie mr-2 text-purple-500"></i><strong>Demandado:</strong> ${sentencia.nombre_demandado}</p>
+                        <p><i class="fas fa-folder mr-2 text-purple-500"></i><strong>Expediente:</strong> ${sentencia.numero_expediente}</p>
+                    </div>
+                    
+                    ${sentencia.resumen ? `
+                        <div class="mt-3 p-3 bg-gray-50 rounded text-sm text-gray-700">
+                            <p class="line-clamp-3">${sentencia.resumen}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${sentencia.palabras_clave ? `
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            ${sentencia.palabras_clave.split(', ').slice(0, 5).map(palabra => 
+                                `<span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">${palabra}</span>`
+                            ).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="mt-4 space-y-2">
+                        <div class="flex justify-between">
+                            <button onclick="showDetails(${sentencia.id})" 
+                                    class="text-purple-600 hover:text-purple-800 font-medium">
+                                <i class="fas fa-eye mr-1"></i>Ver detalles
+                            </button>
+                            <a href="${sentencia.url_archivo}" target="_blank" 
+                               class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-file-pdf mr-1"></i>PDF Original
+                            </a>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex space-x-2">
+                                <button id="fav-btn-${sentencia.id}" 
+                                        onclick="toggleFavorite(${sentencia.id})" 
+                                        class="p-2 rounded hover:bg-gray-100 transition" 
+                                        title="Favorito">
+                                    <i class="far fa-star text-gray-500"></i>
+                                </button>
+                                <button id="compare-btn-${sentencia.id}" 
+                                        onclick="toggleComparison(${sentencia.id})" 
+                                        class="p-2 bg-gray-200 rounded hover:bg-gray-300 transition" 
+                                        title="Comparar">
+                                    <i class="fas fa-balance-scale"></i>
+                                </button>
+                                <button onclick="showSimilar(${sentencia.id})" 
+                                        class="p-2 rounded hover:bg-gray-100 transition" 
+                                        title="Buscar similares">
+                                    <i class="fas fa-search-plus text-purple-500"></i>
+                                </button>
+                            </div>
+                            <button onclick="downloadPDF(${sentencia.id})" 
+                                    class="text-green-600 hover:text-green-800" 
+                                    title="Generar reporte PDF">
+                                <i class="fas fa-download mr-1"></i>Reporte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPagination(currentPage, totalPages) {
+            const container = document.getElementById('pagination');
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            const pageWindow = 2; // Páginas a mostrar antes y después de la actual
+
+            // --- Botones de Primera Página y Anterior ---
+            html += `<button onclick="loadSentencias(1)" 
+                            class="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+                            title="Primera página" ${currentPage === 1 ? 'disabled' : ''}>
+                        <i class="fas fa-angle-double-left"></i>
+                    </button>`;
+            html += `<button onclick="loadSentencias(${currentPage - 1})" 
+                            class="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+                            title="Anterior" ${currentPage === 1 ? 'disabled' : ''}>
+                        <i class="fas fa-angle-left"></i>
+                    </button>`;
+
+            // --- Números de Página con Elipses ---
+            let pageNumbers = [];
+            // Página 1 siempre
+            pageNumbers.push(1);
+
+            // Elipses al principio
+            if (currentPage > pageWindow + 2) {
+                pageNumbers.push('...');
+            }
+
+            // Páginas alrededor de la actual
+            for (let i = Math.max(2, currentPage - pageWindow); i <= Math.min(totalPages - 1, currentPage + pageWindow); i++) {
+                if (!pageNumbers.includes(i)) {
+                    pageNumbers.push(i);
+                }
+            }
+            
+            // Elipses al final
+            if (currentPage < totalPages - (pageWindow + 1)) {
+                if (!pageNumbers.includes('...')) {
+                    pageNumbers.push('...');
+                }
+            }
+
+            // Última página siempre (si no es la 1)
+            if (totalPages > 1) {
+                if (!pageNumbers.includes(totalPages)) {
+                    pageNumbers.push(totalPages);
+                }
+            }
+            
+            // Renderizar los números y elipses
+            pageNumbers.forEach(num => {
+                if (num === '...') {
+                    html += `<span class="px-3 py-2 text-gray-500">...</span>`;
+                } else {
+                    html += `<button onclick="loadSentencias(${num})" 
+                                    class="px-4 py-2 rounded ${num === currentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}">
+                                ${num}
+                            </button>`;
+                }
+            });
+
+
+            // --- Botones de Siguiente y Última Página ---
+            html += `<button onclick="loadSentencias(${currentPage + 1})" 
+                            class="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+                            title="Siguiente" ${currentPage === totalPages ? 'disabled' : ''}>
+                        <i class="fas fa-angle-right"></i>
+                    </button>`;
+            html += `<button onclick="loadSentencias(${totalPages})" 
+                            class="px-3 py-2 rounded bg-gray-200 hover:bg-gray-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+                            title="Última página" ${currentPage === totalPages ? 'disabled' : ''}>
+                        <i class="fas fa-angle-double-right"></i>
+                    </button>`;
+            
+            container.innerHTML = html;
+        }
+
+        async function showDetails(id) {
+            showLoading();
+            try {
+                const response = await fetch(`${window.location.origin}/api/detalle/${id}`);
+                const sentencia = await response.json();
+                
+                const modalContent = document.getElementById('modalContent');
+                modalContent.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="text-xl font-bold text-purple-800 mb-2">${sentencia.numero_sentencia}</h4>
+                            <p class="text-gray-700">Fecha de publicación: ${formatDate(sentencia.fecha_publicacion)}</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h5 class="font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user mr-2 text-purple-500"></i>Demandante
+                                </h5>
+                                <p class="text-gray-600">${sentencia.nombre_demandante}</p>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user-tie mr-2 text-purple-500"></i>Demandado
+                                </h5>
+                                <p class="text-gray-600">${sentencia.nombre_demandado}</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h5 class="font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-folder mr-2 text-purple-500"></i>Número de Expediente
+                            </h5>
+                            <p class="text-gray-600">${sentencia.numero_expediente}</p>
+                        </div>
+                        
+                        ${sentencia.palabras_clave ? `
+                            <div>
+                                <h5 class="font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-tags mr-2 text-purple-500"></i>Palabras Clave
+                                </h5>
+                                <div class="flex flex-wrap gap-2">
+                                    ${sentencia.palabras_clave.split(', ').map(palabra => 
+                                        `<span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full">${palabra}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div>
+                            <h5 class="font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-gavel mr-2 text-purple-500"></i>Fundamentos
+                            </h5>
+                            <div class="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                                <ol class="list-decimal list-inside space-y-2">
+                                    ${sentencia.fundamentos.map(f => `<li class="text-gray-700">${f}</li>`).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center">
+                            <a href="${sentencia.url_archivo}" target="_blank" 
+                               class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                                <i class="fas fa-file-pdf mr-2"></i>Ver Documento PDF
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('detailModal').classList.remove('hidden');
+            } catch (error) {
+                showNotification('Error al cargar detalles', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadQuickStats() {
+            try {
+                const response = await fetch(`${window.location.origin}/api/estadisticas`);
+                const stats = await response.json();
+                
+                const container = document.getElementById('quickStats');
+                container.innerHTML = `
+                    <div class="stats-card rounded-lg p-6 text-center">
+                        <i class="fas fa-file-alt text-4xl mb-2"></i>
+                        <h3 class="text-3xl font-bold">${stats.total_sentencias}</h3>
+                        <p class="text-sm">Total Sentencias</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 text-center shadow-lg hover-scale">
+                        <i class="fas fa-clock text-4xl text-blue-500 mb-2"></i>
+                        <h3 class="text-2xl font-bold text-gray-800">${stats.ultima_actualizacion ? stats.ultima_actualizacion[1] : '0'}</h3>
+                        <p class="text-sm text-gray-600">Nuevas (última actualización)</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 text-center shadow-lg hover-scale">
+                        <i class="fas fa-chart-line text-4xl text-green-500 mb-2"></i>
+                        <h3 class="text-2xl font-bold text-gray-800">${stats.sentencias_por_fecha.length}</h3>
+                        <p class="text-sm text-gray-600">Días con sentencias</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 text-center shadow-lg hover-scale">
+                        <i class="fas fa-sync-alt text-4xl ${stats.estado_sistema === 'activo' ? 'text-green-500 animate-pulse' : 'text-gray-400'} mb-2"></i>
+                        <h3 class="text-xl font-bold text-gray-800">${stats.estado_sistema === 'activo' ? 'Activo' : 'Pausado'}</h3>
+                        <p class="text-sm text-gray-600">Estado del Sistema</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+
+        async function showStats() {
+            showLoading();
+            try {
+                const response = await fetch(`${window.location.origin}/api/estadisticas`);
+                const stats = await response.json();
+                
+                // Mostrar modal
+                document.getElementById('statsModal').classList.remove('hidden');
+                
+                // Gráfico de sentencias por fecha
+                const ctxFechas = document.getElementById('chartFechas').getContext('2d');
+                new Chart(ctxFechas, {
+                    type: 'line',
+                    data: {
+                        labels: stats.sentencias_por_fecha.map(s => formatDate(s[0])).slice(0, 10),
+                        datasets: [{
+                            label: 'Sentencias',
+                            data: stats.sentencias_por_fecha.map(s => s[1]).slice(0, 10),
+                            borderColor: 'rgb(147, 51, 234)',
+                            backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+                
+                // Gráfico de palabras clave
+                const ctxPalabras = document.getElementById('chartPalabras').getContext('2d');
+                new Chart(ctxPalabras, {
+                    type: 'bar',
+                    data: {
+                        labels: stats.top_palabras.map(p => p[0]).slice(0, 10),
+                        datasets: [{
+                            label: 'Frecuencia',
+                            data: stats.top_palabras.map(p => p[1]).slice(0, 10),
+                            backgroundColor: 'rgba(147, 51, 234, 0.8)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+                
+                // Búsquedas frecuentes
+                const busquedasContainer = document.getElementById('busquedasFrecuentes');
+                busquedasContainer.innerHTML = stats.busquedas_frecuentes.map(b => `
+                    <div class="bg-gray-100 rounded-lg p-3 text-center">
+                        <p class="font-semibold">${b[0]}</p>
+                        <p class="text-sm text-gray-600">${b[1]} búsquedas</p>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                showNotification('Error al cargar estadísticas', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function updateData() {
+            if (!confirm('¿Desea actualizar los datos ahora? Esto puede tomar unos minutos.')) return;
+            
+            showLoading();
+            try {
+                const response = await fetch(`${window.location.origin}/api/actualizar`, { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification(`Actualización completada: ${result.nuevas_sentencias} nuevas sentencias`, 'success');
+                    loadSentencias();
+                    loadQuickStats();
+                } else {
+                    showNotification('Error en la actualización', 'error');
+                }
+            } catch (error) {
+                showNotification('Error al actualizar', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function exportData(format) {
+            const search = document.getElementById('searchInput').value;
+            const params = search ? `?search=${encodeURIComponent(search)}` : '';
+            
+            window.location.href = `${window.location.origin}/api/exportar/${format}${params}`;
+            showNotification(`Exportando datos en formato ${format.toUpperCase()}`, 'success');
+        }
+
+        function searchSentencias() {
+            loadSentencias(1);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('fechaDesde').value = '';
+            document.getElementById('fechaHasta').value = '';
+            document.getElementById('sortSelect').value = 'fecha_publicacion DESC';
+            loadSentencias(1);
+        }
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', darkMode);
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        function closeStatsModal() {
+            document.getElementById('statsModal').classList.add('hidden');
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.add('hidden');
+        }
+
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notifications');
+            const id = Date.now();
+            
+            const bgColor = {
+                'success': 'bg-green-500',
+                'error': 'bg-red-500',
+                'info': 'bg-blue-500'
+            }[type];
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${bgColor} text-white px-6 py-4 rounded-lg shadow-lg mb-4`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-3"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.5s ease-out';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-PE', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric' 
+            });
+        }
+
+        // Cargar modo oscuro guardado
+        if (localStorage.getItem('darkMode') === 'true') {
+            darkMode = true;
+            document.body.classList.add('dark-mode');
+        }
+
+        // Auto-actualizar cada 5 minutos
+        setInterval(() => {
+            loadQuickStats();
+        }, 300000);
+        
+        // Nuevas funcionalidades
+        let selectedForComparison = [];
+        let favoritesCache = [];
+        
+        async function toggleFavorite(sentenciaId) {
+            try {
+                const checkResponse = await fetch(`${window.location.origin}/api/favoritos/check/${sentenciaId}`);
+                const checkData = await checkResponse.json();
+                
+                if (checkData.is_favorite) {
+                    // Eliminar de favoritos
+                    const response = await fetch(`${window.location.origin}/api/favoritos?sentencia_id=${sentenciaId}`, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showNotification('Eliminado de favoritos', 'success');
+                        updateFavoriteButton(sentenciaId, false);
+                    }
+                } else {
+                    // Agregar a favoritos
+                    const response = await fetch(`${window.location.origin}/api/favoritos`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sentencia_id: sentenciaId })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showNotification('Agregado a favoritos', 'success');
+                        updateFavoriteButton(sentenciaId, true);
+                    }
+                }
+            } catch (error) {
+                showNotification('Error al gestionar favoritos', 'error');
+            }
+        }
+        
+        function updateFavoriteButton(sentenciaId, isFavorite) {
+            const btn = document.querySelector(`#fav-btn-${sentenciaId}`);
+            if (btn) {
+                btn.innerHTML = isFavorite ? 
+                    '<i class="fas fa-star text-yellow-500"></i>' : 
+                    '<i class="far fa-star text-gray-500"></i>';
+            }
+        }
+        
+        async function showFavorites() {
+            showLoading();
+            try {
+                const response = await fetch(`${window.location.origin}/api/favoritos`);
+                favoritesCache = await response.json();
+                
+                showFavoritesModal();
+            } catch (error) {
+                showNotification('Error al cargar favoritos', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function showFavoritesModal() {
+            const modalHtml = `
+                <div id="favoritesModal" class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50">
+                    <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-fadeIn">
+                        <div class="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                            <h3 class="text-2xl font-bold">Sentencias Favoritas</h3>
+                            <button onclick="closeFavoritesModal()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            ${favoritesCache.length === 0 ? 
+                                '<p class="text-center text-gray-600">No tienes sentencias favoritas</p>' :
+                                favoritesCache.map(fav => `
+                                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 class="font-bold text-purple-600">${fav.numero_sentencia}</h4>
+                                                <p class="text-sm text-gray-600">Agregado: ${formatDate(fav.fecha_agregado)}</p>
+                                                <p class="mt-2">${fav.nombre_demandante} vs ${fav.nombre_demandado}</p>
+                                            </div>
+                                            <button onclick="removeFavorite(${fav.id})" class="text-red-500 hover:text-red-700">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        ${fav.notas ? `<p class="mt-2 text-sm italic">${fav.notas}</p>` : ''}
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+        
+        function closeFavoritesModal() {
+            const modal = document.getElementById('favoritesModal');
+            if (modal) modal.remove();
+        }
+        
+        async function removeFavorite(sentenciaId) {
+            if (!confirm('¿Eliminar de favoritos?')) return;
+            
+            try {
+                const response = await fetch(`${window.location.origin}/api/favoritos?sentencia_id=${sentenciaId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Eliminado de favoritos', 'success');
+                    showFavorites(); // Recargar lista
+                    updateFavoriteButton(sentenciaId, false);
+                }
+            } catch (error) {
+                showNotification('Error al eliminar favorito', 'error');
+            }
+        }
+        
+        async function showSimilar(sentenciaId) {
+            showLoading();
+            try {
+                const response = await fetch(`${window.location.origin}/api/sentencias/similares/${sentenciaId}`);
+                const similares = await response.json();
+                
+                showSimilarModal(sentenciaId, similares);
+            } catch (error) {
+                showNotification('Error al buscar sentencias similares', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function showSimilarModal(sentenciaId, similares) {
+            const modalHtml = `
+                <div id="similarModal" class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50">
+                    <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-fadeIn">
+                        <div class="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                            <h3 class="text-2xl font-bold">Sentencias Similares</h3>
+                            <button onclick="closeSimilarModal()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            ${similares.length === 0 ? 
+                                '<p class="text-center text-gray-600">No se encontraron sentencias similares</p>' :
+                                similares.map(s => `
+                                    <div class="bg-gray-50 rounded-lg p-4 mb-4 hover:bg-gray-100 transition">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <h4 class="font-bold text-purple-600">${s.numero_sentencia}</h4>
+                                                <div class="text-sm text-gray-600 mt-1">
+                                                    <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded">
+                                                        ${(s.similarity_score * 100).toFixed(1)}% similar
+                                                    </span>
+                                                </div>
+                                                <p class="mt-2">${s.nombre_demandante} vs ${s.nombre_demandado}</p>
+                                                <p class="text-sm text-gray-500">${formatDate(s.fecha_publicacion)}</p>
+                                            </div>
+                                            <button onclick="showDetails(${s.id})" class="text-purple-600 hover:text-purple-800">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+        
+        function closeSimilarModal() {
+            const modal = document.getElementById('similarModal');
+            if (modal) modal.remove();
+        }
+        
+        function toggleComparison(sentenciaId) {
+            const index = selectedForComparison.indexOf(sentenciaId);
+            
+            if (index === -1) {
+                if (selectedForComparison.length >= 2) {
+                    showNotification('Solo puedes comparar 2 sentencias a la vez', 'info');
+                    return;
+                }
+                selectedForComparison.push(sentenciaId);
+            } else {
+                selectedForComparison.splice(index, 1);
+            }
+            
+            updateComparisonButtons();
+            
+            if (selectedForComparison.length === 2) {
+                showComparisonOption();
+            }
+        }
+        
+        function updateComparisonButtons() {
+            document.querySelectorAll('[id^="compare-btn-"]').forEach(btn => {
+                const id = parseInt(btn.id.replace('compare-btn-', ''));
+                if (selectedForComparison.includes(id)) {
+                    btn.classList.add('bg-purple-600', 'text-white');
+                    btn.classList.remove('bg-gray-200');
+                } else {
+                    btn.classList.remove('bg-purple-600', 'text-white');
+                    btn.classList.add('bg-gray-200');
+                }
+            });
+        }
+        
+        function showComparisonOption() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+            notification.innerHTML = `
+                <p class="mb-2">2 sentencias seleccionadas para comparar</p>
+                <div class="flex space-x-2">
+                    <button onclick="compareSelected()" class="bg-white text-purple-600 px-4 py-2 rounded hover:bg-gray-100">
+                        Comparar
+                    </button>
+                    <button onclick="clearComparison()" class="bg-purple-800 text-white px-4 py-2 rounded hover:bg-purple-900">
+                        Cancelar
+                    </button>
+                </div>
+            `;
+            notification.id = 'comparisonNotification';
+            document.body.appendChild(notification);
+        }
+        
+        function clearComparison() {
+            selectedForComparison = [];
+            updateComparisonButtons();
+            const notification = document.getElementById('comparisonNotification');
+            if (notification) notification.remove();
+        }
+        
+        async function compareSelected() {
+            if (selectedForComparison.length !== 2) return;
+            
+            showLoading();
+            try {
+                const response = await fetch(`${window.location.origin}/api/comparar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: selectedForComparison })
+                });
+                const comparison = await response.json();
+                
+                showComparisonModal(comparison);
+                clearComparison();
+            } catch (error) {
+                showNotification('Error al comparar sentencias', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function showComparisonModal(comparison) {
+            const modalHtml = `
+                <div id="comparisonModal" class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50">
+                    <div class="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto animate-fadeIn">
+                        <div class="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                            <h3 class="text-2xl font-bold">Comparación de Sentencias</h3>
+                            <button onclick="closeComparisonModal()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-3">Similitud de contenido</h4>
+                                <div class="bg-gray-200 rounded-full h-6 overflow-hidden">
+                                    <div class="bg-purple-600 h-full" style="width: ${comparison.content_similarity * 100}%"></div>
+                                </div>
+                                <p class="text-center mt-2">${(comparison.content_similarity * 100).toFixed(1)}% similar</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-3">Sentencia 1</h4>
+                                    ${Object.entries(comparison.metadata).map(([key, data]) => `
+                                        <p class="mb-2"><strong>${key}:</strong> ${data.sentencia1}</p>
+                                    `).join('')}
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-3">Sentencia 2</h4>
+                                    ${Object.entries(comparison.metadata).map(([key, data]) => `
+                                        <p class="mb-2"><strong>${key}:</strong> ${data.sentencia2}</p>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-3">Palabras clave comunes</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    ${comparison.common_keywords.map(kw => 
+                                        `<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full">${kw}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                            
+                            <button onclick="downloadComparisonPDF()" class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700">
+                                <i class="fas fa-file-pdf mr-2"></i>Descargar Comparación PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+        
+        function closeComparisonModal() {
+            const modal = document.getElementById('comparisonModal');
+            if (modal) modal.remove();
+        }
+        
+        async function downloadComparisonPDF() {
+            if (selectedForComparison.length !== 2) return;
+            
+            try {
+                const response = await fetch(`${window.location.origin}/api/comparar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: selectedForComparison, format: 'pdf' })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'comparacion_sentencias.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                }
+            } catch (error) {
+                showNotification('Error al generar PDF', 'error');
+            }
+        }
+        
+        async function downloadPDF(sentenciaId) {
+            try {
+                const response = await fetch(`${window.location.origin}/api/reporte/sentencia/${sentenciaId}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `sentencia_${sentenciaId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                    showNotification('PDF generado exitosamente', 'success');
+                }
+            } catch (error) {
+                showNotification('Error al generar PDF', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
